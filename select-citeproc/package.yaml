@@ -1,0 +1,49 @@
+name: select-citeproc
+version: '0.1.0.0'
+synopsis: Select a record from citeproc.yaml
+description: Please see README.md
+category: Science
+author: David Baynard
+maintainer: davidbaynard@gmail.com
+copyright: '2016'
+license: BSD3
+github: dbaynard/notr
+extra-source-files:
+- README.md
+library:
+  source-dirs: src
+  ghc-options: -Wall
+  exposed-modules:
+  - Citeproc
+  dependencies:
+  - base >=4.7 && <5
+  - aeson >= 1.1.0.0
+  - bytestring
+  - json-autotype >= 1.0.15
+  - text
+  - yaml
+executables:
+  select-citeproc-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - select-citeproc
+tests:
+  select-citeproc-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -Wall
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - select-citeproc
+    - hspec

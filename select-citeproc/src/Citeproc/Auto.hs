@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeOperators       #-}
 {-# LANGUAGE DeriveGeneric       #-}
 
-module SelectCiteprocSrcCiteprocAuto where
+module Citeproc.Auto where
 
 import           System.Exit        (exitFailure, exitSuccess)
 import           System.IO          (stderr, hPutStrLn)
