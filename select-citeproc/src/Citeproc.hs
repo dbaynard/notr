@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedStrings, ApplicativeDo #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DataKinds #-}
 
 module Citeproc (
-    main
+    run
 )   where
 
 import           System.Exit        (exitFailure)
@@ -10,11 +11,11 @@ import           System.IO          (stderr, hPutStrLn)
 import qualified Data.ByteString.Char8 as BS
 import           Control.Monad      (forM_)
 
-import ReadArgs
-import System.Directory
 import System.FilePath
 import Control.Error
 import Control.Monad.IO.Class
+
+import Data.Tagged
 
 import Data.Yaml
 import Data.Yaml.Pretty
@@ -36,15 +37,9 @@ parseYaml filename = do
             hPutStrLn stderr msg
             exitFailure
 
-main :: IO ()
-main = do
-    (identifier :: String, filenames' :: [FilePath]) <- readArgs
-    filenames <- case filenames' of
-        [] -> do
-            home <- getHomeDirectory
-            pure [home </> "Dropbox" </> "General" </> "library" <.> "yaml"]
-        xs -> pure xs
-    forM_ filenames $ \f -> runMaybeT $ do
+run :: MonadIO m => Tagged "identifier" String -> [Tagged "filename" FilePath] -> m ()
+run (Tagged identifier) filenames =
+    forM_ filenames $ \(Tagged f) -> runMaybeT $ do
         library <- parseYaml f
         match <- hoistMaybe . headMay . filter ((pack identifier ==) . referencesEltId) . topLevelReferences $ library
         liftIO . BS.putStr . encodePretty (orderingReferencesElt `setConfCompare` defConfig)  $ [match]
