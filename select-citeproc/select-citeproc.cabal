@@ -53,8 +53,9 @@ executable select-citeproc
   build-depends:
       base
     , select-citeproc
-    , ReadArgs
     , directory
+    , filepath
+    , optparse-generic
     , tagged
   default-language: Haskell2010
 

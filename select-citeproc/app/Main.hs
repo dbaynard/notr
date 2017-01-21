@@ -1,24 +1,30 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE DeriveGeneric, DeriveAnyClass, OverloadedStrings, RecordWildCards #-}
 
 module Main (
     main
 )   where
 
-import ReadArgs
+import Options.Generic
 import System.FilePath
 import System.Directory
 import Data.Tagged
 
 import Citeproc (run)
 
+data Arguments = Arguments
+    { identifier :: String <?> "The identifier to search for"
+    , databases :: [FilePath] <?> "Library files to search"
+    } deriving (Show, Generic, ParseRecord)
+
 main :: IO ()
 main = do
-    (identifier :: String, filenames' :: [FilePath]) <- readArgs
-    filenames <- case filenames' of
+    Arguments{..} <- getRecord "Extract entries from citeproc library.yaml"
+    filenames <- case unHelpful databases of
         [] -> do
             home <- getHomeDirectory
             pure [home </> "Dropbox" </> "General" </> "library" <.> "yaml"]
         xs -> pure xs
-    run (Tagged @"identifier" identifier) $ Tagged @"filename" <$> filenames
+    run (Tagged @"identifier" $ unHelpful identifier) $ Tagged @"filename" <$> filenames
