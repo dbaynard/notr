@@ -17,13 +17,17 @@ library:
   - Citeproc
   dependencies:
   - base >=4.7 && <5
+  - ReadArgs
   - aeson >= 1.1.0.0
   - bytestring
+  - directory
+  - errors
+  - filepath
   - json-autotype >= 1.0.15
   - text
   - yaml
 executables:
-  select-citeproc-exe:
+  select-citeproc:
     main: Main.hs
     source-dirs: app
     ghc-options:

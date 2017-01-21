@@ -7,16 +7,12 @@
 
 module Citeproc.Auto where
 
-import           System.Exit        (exitFailure, exitSuccess)
-import           System.IO          (stderr, hPutStrLn)
-import qualified Data.ByteString.Lazy.Char8 as BSL
-import           System.Environment (getArgs)
-import           Control.Monad      (forM_, mzero, join)
-import           Control.Applicative
+import           Control.Monad      (mzero, join)
 import           Data.Aeson.AutoType.Alternative
-import           Data.Aeson(decode, Value(..), FromJSON(..), ToJSON(..),
-                            pairs,
-                            (.:), (.:?), (.=), object)
+import qualified Data.Aeson as A (pairs, object)
+import           Data.Aeson.Types(Pair)
+import           Data.Aeson(Value(..), FromJSON(..), ToJSON(..),
+                            (.:), (.:?), (.=))
 import           Data.Monoid
 import           Data.Text (Text)
 import           GHC.Generics
@@ -24,6 +20,8 @@ import           GHC.Generics
 -- | Workaround for https://github.com/bos/aeson/issues/287.
 o .:?? val = fmap join (o .:? val)
 
+object = A.object . filter ((/= Null) . snd)
+pairs = A.pairs
 
 data AuthorElt = AuthorElt { 
     authorEltFamily :: (Maybe (Text:|:[(Maybe Value)])),
@@ -107,6 +105,10 @@ data ReferencesElt = ReferencesElt {
     referencesEltKeyword :: (Maybe (Text:|:[(Maybe Value)]))
   } deriving (Show,Eq,Generic)
 
+orderingReferencesElt :: Text -> Text -> Ordering
+orderingReferencesElt "id" _ = LT
+orderingReferencesElt _ "id" = GT
+orderingReferencesElt _ _ = EQ
 
 instance FromJSON ReferencesElt where
   parseJSON (Object v) = ReferencesElt <$> v .:?? "edition" <*> v .:?? "ISSN" <*> v .:?? "chapter-number" <*> v .:?? "annote" <*> v .:?? "DOI" <*> v .:?? "publisher-place" <*> v .:?? "volume" <*> v .:?? "collection-number" <*> v .:?? "URL" <*> v .:?? "page" <*> v .:?? "ISBN" <*> v .:?? "title-short" <*> v .:?? "container-title" <*> v .:?? "author" <*> v .:   "id" <*> v .:?? "accessed" <*> v .:?? "issued" <*> v .:?? "PMID" <*> v .:?? "abstract" <*> v .:   "title" <*> v .:   "type" <*> v .:?? "number" <*> v .:?? "genre" <*> v .:?? "collection-title" <*> v .:?? "publisher" <*> v .:?? "issue" <*> v .:?? "editor" <*> v .:?? "keyword"
@@ -131,26 +133,4 @@ instance FromJSON TopLevel where
 instance ToJSON TopLevel where
   toJSON     (TopLevel {..}) = object ["references" .= topLevelReferences]
   toEncoding (TopLevel {..}) = pairs  ("references" .= topLevelReferences)
-
-
-
-
-parse :: FilePath -> IO TopLevel
-parse filename = do input <- BSL.readFile filename
-                    case decode input of
-                      Nothing -> fatal $ case (decode input :: Maybe Value) of
-                                           Nothing -> "Invalid JSON file: "     ++ filename
-                                           Just v  -> "Mismatched JSON value from file: " ++ filename
-                      Just r  -> return (r :: TopLevel)
-  where
-    fatal :: String -> IO a
-    fatal msg = do hPutStrLn stderr msg
-                   exitFailure
-
-main :: IO ()
-main = do
-  filenames <- getArgs
-  forM_ filenames (\f -> parse f >>= (\p -> p `seq` putStrLn $ "Successfully parsed " ++ f))
-  exitSuccess
-
 
