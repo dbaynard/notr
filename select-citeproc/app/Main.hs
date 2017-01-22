@@ -7,11 +7,11 @@ module Main (
 )   where
 
 import WithCli
-import System.FilePath
-import System.Directory
+import System.Environment
 import Data.Tagged
+import Data.Maybe
 
-import Citeproc (run)
+import Citeproc
 
 data Options = Options
     { databases :: [FilePath]
@@ -26,14 +26,14 @@ mods = [ AddShortOption "databases" 'd'
 main :: IO ()
 main = mods `withCliModified` \identifier Options{..} -> do
     filenames <- case databases of
-        [] -> do
-            home <- getHomeDirectory
-            pure [home </> "Dropbox" </> "General" </> "library" <.> "yaml"]
-        xs -> pure xs
+        [] -> fmap (fromMaybe []) . runMaybeT $ do
+            lib_yaml <- MaybeT . lookupEnv $ "NOTR_LIBRARY_YAML"
+            pure $ [Tagged @"filename" lib_yaml]
+        xs -> pure $ Tagged @"filename" <$> xs
     let searchTerm = case doi of
             True -> Left (Tagged @"doi" identifier)
             False -> Right (Tagged @"identifier" identifier)
         fileDir = case write of
             True -> Just . Tagged @"write-to-file" $ "doi"
             False -> Nothing
-    run searchTerm fileDir $ Tagged @"filename" <$> filenames
+    run searchTerm fileDir filenames

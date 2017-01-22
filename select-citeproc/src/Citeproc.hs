@@ -5,6 +5,7 @@
 
 module Citeproc (
     run
+  , MaybeT(..)
 )   where
 
 import           System.Exit        (exitFailure)
