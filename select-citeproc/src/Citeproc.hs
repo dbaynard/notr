@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings, ApplicativeDo #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module Citeproc (
     run
@@ -11,7 +12,8 @@ import           System.IO          (stderr, hPutStrLn)
 import qualified Data.ByteString.Char8 as BS
 import           Control.Monad      (forM_)
 
-import System.FilePath
+import Data.Semigroup
+
 import Control.Error
 import Control.Monad.IO.Class
 
@@ -22,6 +24,9 @@ import Data.Yaml.Pretty
 import Data.Text (pack)
 
 import Citeproc.Auto
+
+outputYaml :: [ReferencesElt] -> TopLevel
+outputYaml topLevelReferences = TopLevel{..}
 
 parseYaml :: forall m . MonadIO m => FilePath -> m TopLevel
 parseYaml filename = do
@@ -42,6 +47,6 @@ run (Tagged identifier) filenames =
     forM_ filenames $ \(Tagged f) -> runMaybeT $ do
         library <- parseYaml f
         match <- hoistMaybe . headMay . filter ((pack identifier ==) . referencesEltId) . topLevelReferences $ library
-        liftIO . BS.putStr . encodePretty (orderingReferencesElt `setConfCompare` defConfig)  $ [match]
+        liftIO . BS.putStr . ("---\n" <>) . (<> "---\n") . encodePretty (orderingReferencesElt `setConfCompare` defConfig) . outputYaml $ [match]
 
 

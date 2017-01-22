@@ -20,7 +20,6 @@ library:
   - aeson >= 1.1.0.0
   - bytestring
   - errors
-  - filepath
   - json-autotype >= 1.0.15
   - tagged
   - text
