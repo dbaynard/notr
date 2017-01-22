@@ -9,7 +9,8 @@ module Main (
 import WithCli
 import System.Environment
 import Data.Tagged
-import Data.Maybe
+
+import Control.Error
 
 import Citeproc
 
@@ -28,9 +29,10 @@ mods = [ AddShortOption "libraries" 'l'
 main :: IO ()
 main = mods `withCliModified` \identifier Options{..} -> do
     filenames <- case libraries of
-        [] -> fmap (fromMaybe []) . runMaybeT $ do
-            lib_yaml <- MaybeT . lookupEnv $ "NOTR_LIBRARY_YAML"
-            pure $ [Tagged @"filename" lib_yaml]
+        [] -> let f = errLn "No NOTR_LIBRARY_YAML set." in
+            (f *> pure []) `maybeT` pure $ do
+                lib_yaml <- MaybeT . lookupEnv $ "NOTR_LIBRARY_YAML"
+                pure $ [Tagged @"filename" lib_yaml]
         xs -> pure $ Tagged @"filename" <$> xs
     let searchTerm = case doi of
             True -> Left (Tagged @"doi" identifier)

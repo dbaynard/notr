@@ -5,11 +5,9 @@
 
 module Citeproc (
     run
-  , MaybeT(..)
 )   where
 
 import           System.Exit        (exitFailure)
-import           System.IO          (stderr, hPutStrLn)
 import qualified Data.ByteString.Char8 as BS
 import           Control.Monad      (forM_)
 
@@ -41,7 +39,7 @@ parseYaml filename = do
     where
         fatal :: String -> m a
         fatal msg = liftIO $ do
-            hPutStrLn stderr msg
+            errLn msg
             exitFailure
 
 run :: MonadIO m

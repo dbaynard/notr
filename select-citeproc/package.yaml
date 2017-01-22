@@ -37,6 +37,7 @@ executables:
     dependencies:
     - base
     - select-citeproc
+    - errors
     - getopt-generics
     - tagged
 tests:
