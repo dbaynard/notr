@@ -16,6 +16,7 @@ import Citeproc (run)
 data Options = Options
     { databases :: [FilePath]
     , doi :: Bool
+    , write :: Bool
     } deriving (Show, Generic, HasArguments)
 
 mods :: [Modifier]
@@ -32,4 +33,7 @@ main = mods `withCliModified` \identifier Options{..} -> do
     let searchTerm = case doi of
             True -> Left (Tagged @"doi" identifier)
             False -> Right (Tagged @"identifier" identifier)
-    run searchTerm $ Tagged @"filename" <$> filenames
+        fileDir = case write of
+            True -> Just . Tagged @"write-to-file" $ "doi"
+            False -> Nothing
+    run searchTerm fileDir $ Tagged @"filename" <$> filenames
