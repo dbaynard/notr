@@ -14,18 +14,20 @@ import Data.Maybe
 import Citeproc
 
 data Options = Options
-    { databases :: [FilePath]
+    { libraries :: [FilePath]
     , doi :: Bool
     , write :: Bool
     } deriving (Show, Generic, HasArguments)
 
 mods :: [Modifier]
-mods = [ AddShortOption "databases" 'd'
+mods = [ AddShortOption "libraries" 'l'
+       , AddShortOption "write" 'w'
+       , AddShortOption "doi" 'd'
        ]
 
 main :: IO ()
 main = mods `withCliModified` \identifier Options{..} -> do
-    filenames <- case databases of
+    filenames <- case libraries of
         [] -> fmap (fromMaybe []) . runMaybeT $ do
             lib_yaml <- MaybeT . lookupEnv $ "NOTR_LIBRARY_YAML"
             pure $ [Tagged @"filename" lib_yaml]
