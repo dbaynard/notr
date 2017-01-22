@@ -17,8 +17,12 @@ data Options = Options
     { databases :: [FilePath]
     } deriving (Show, Generic, HasArguments)
 
+mods :: [Modifier]
+mods = [ AddShortOption "databases" 'd'
+       ]
+
 main :: IO ()
-main = withCli $ \identifier Options{..} -> do
+main = mods `withCliModified` \identifier Options{..} -> do
     filenames <- case databases of
         [] -> do
             home <- getHomeDirectory
