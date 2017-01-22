@@ -18,16 +18,19 @@ data Options = Options
     { libraries :: [FilePath]
     , doi :: Bool
     , write :: Bool
+    , defaultLibrary :: Maybe FilePath
     } deriving (Show, Generic, HasArguments)
 
 mods :: [Modifier]
 mods = [ AddShortOption "libraries" 'l'
        , AddShortOption "write" 'w'
        , AddShortOption "doi" 'd'
+       , AddShortOption "defaultLibrary" 'L'
        ]
 
 main :: IO ()
 main = mods `withCliModified` \identifier Options{..} -> do
+    pure () `maybe` setEnv "NOTR_LIBRARY_YAML" $ defaultLibrary
     filenames <- case libraries of
         [] -> let f = errLn "No NOTR_LIBRARY_YAML set." in
             (f *> pure []) `maybeT` pure $ do
