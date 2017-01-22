@@ -42,11 +42,18 @@ parseYaml filename = do
             hPutStrLn stderr msg
             exitFailure
 
-run :: MonadIO m => Tagged "identifier" String -> [Tagged "filename" FilePath] -> m ()
-run (Tagged identifier) filenames =
-    forM_ filenames $ \(Tagged f) -> runMaybeT $ do
-        library <- parseYaml f
-        match <- hoistMaybe . headMay . filter ((pack identifier ==) . referencesEltId) . topLevelReferences $ library
-        liftIO . BS.putStr . ("---\n" <>) . (<> "---\n") . encodePretty (orderingReferencesElt `setConfCompare` defConfig) . outputYaml $ [match]
+run :: MonadIO m
+    => Either (Tagged "doi" String) (Tagged "identifier" String)
+    -> [Tagged "filename" FilePath]
+    -> m ()
+run ident filenames =
+        forM_ filenames $ \(Tagged f) -> runMaybeT $ do
+            library <- parseYaml f
+            match <- hoistMaybe . headMay . filter searchFilter . topLevelReferences $ library
+            liftIO . BS.putStr . ("---\n" <>) . (<> "---\n") . encodePretty (orderingReferencesElt `setConfCompare` defConfig) . outputYaml $ [match]
+    where
+        searchFilter = case ident of
+            Left (Tagged search)  -> maybe False (pack search ==) . getDOI
+            Right (Tagged search) -> (pack search ==) . referencesEltId
 
 

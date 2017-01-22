@@ -7,13 +7,14 @@
 
 module Citeproc.Auto where
 
-import           Control.Monad      (mzero, join)
+import           Control.Monad      (mzero, join, (<=<))
 import           Data.Aeson.AutoType.Alternative
 import qualified Data.Aeson as A (pairs, object)
 import           Data.Aeson.Types(Pair)
 import           Data.Aeson(Value(..), FromJSON(..), ToJSON(..),
                             (.:), (.:?), (.=))
 import           Data.Monoid
+import           Control.Applicative
 import           Data.Text (Text)
 import           GHC.Generics
 
@@ -109,6 +110,9 @@ orderingReferencesElt :: Text -> Text -> Ordering
 orderingReferencesElt "id" _ = LT
 orderingReferencesElt _ "id" = GT
 orderingReferencesElt _ _ = EQ
+
+getDOI :: ReferencesElt -> Maybe Text
+getDOI = pure `alt` const empty <=< referencesEltDOI
 
 instance FromJSON ReferencesElt where
   parseJSON (Object v) = ReferencesElt <$> v .:?? "edition" <*> v .:?? "ISSN" <*> v .:?? "chapter-number" <*> v .:?? "annote" <*> v .:?? "DOI" <*> v .:?? "publisher-place" <*> v .:?? "volume" <*> v .:?? "collection-number" <*> v .:?? "URL" <*> v .:?? "page" <*> v .:?? "ISBN" <*> v .:?? "title-short" <*> v .:?? "container-title" <*> v .:?? "author" <*> v .:   "id" <*> v .:?? "accessed" <*> v .:?? "issued" <*> v .:?? "PMID" <*> v .:?? "abstract" <*> v .:   "title" <*> v .:   "type" <*> v .:?? "number" <*> v .:?? "genre" <*> v .:?? "collection-title" <*> v .:?? "publisher" <*> v .:?? "issue" <*> v .:?? "editor" <*> v .:?? "keyword"

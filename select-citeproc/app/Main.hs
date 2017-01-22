@@ -15,6 +15,7 @@ import Citeproc (run)
 
 data Options = Options
     { databases :: [FilePath]
+    , doi :: Bool
     } deriving (Show, Generic, HasArguments)
 
 mods :: [Modifier]
@@ -28,4 +29,7 @@ main = mods `withCliModified` \identifier Options{..} -> do
             home <- getHomeDirectory
             pure [home </> "Dropbox" </> "General" </> "library" <.> "yaml"]
         xs -> pure xs
-    run (Tagged @"identifier" identifier) $ Tagged @"filename" <$> filenames
+    let searchTerm = case doi of
+            True -> Left (Tagged @"doi" identifier)
+            False -> Right (Tagged @"identifier" identifier)
+    run searchTerm $ Tagged @"filename" <$> filenames
