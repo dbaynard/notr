@@ -37,8 +37,9 @@ executables:
     dependencies:
     - base
     - select-citeproc
-    - ReadArgs
     - directory
+    - filepath
+    - getopt-generics
     - tagged
 tests:
   select-citeproc-test:
