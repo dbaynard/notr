@@ -13,6 +13,7 @@ import           Control.Monad      (forM_)
 
 import Data.Semigroup
 import System.FilePath
+import System.Directory
 
 import Control.Error
 import Control.Monad.IO.Class
@@ -54,9 +55,10 @@ run ident writeToFile filenames =
             let refText = ("---\n" <>) . (<> "---\n") . encodePretty (orderingReferencesElt `setConfCompare` defConfig) . outputYaml $ [match]
             case writeToFile of
                 Just (Tagged x) -> do
-                    refFile <- hoistMaybe . getDOI $ match
-                    liftIO . (`BS.writeFile` refText) $
-                        x </> unpack refFile <.> "yaml"
+                    doi <- hoistMaybe . getDOI $ match
+                    let refFile = x </> unpack doi <.> "yaml"
+                    liftIO . createDirectoryIfMissing True . takeDirectory $ refFile
+                    liftIO . (`BS.writeFile` refText) $ refFile
                 Nothing -> liftIO . BS.putStr $ refText
     where
         searchFilter = case ident of
