@@ -59,6 +59,7 @@ run ident writeToFile filenames =
                     let refFile = x </> unpack doi <.> "yaml"
                     liftIO . createDirectoryIfMissing True . takeDirectory $ refFile
                     liftIO . (`BS.writeFile` refText) $ refFile
+                    liftIO . errLn . unwords $ ["Created", refFile, "for", unpack doi]
                 Nothing -> liftIO . BS.putStr $ refText
     where
         searchFilter = case ident of
