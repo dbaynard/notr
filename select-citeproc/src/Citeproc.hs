@@ -2,6 +2,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Citeproc (
     run
@@ -10,6 +12,7 @@ module Citeproc (
 import           System.Exit        (exitFailure)
 import qualified Data.ByteString.Char8 as BS
 import           Control.Monad      (forM_)
+import           Control.Applicative
 
 import Data.Semigroup
 import System.FilePath
@@ -20,20 +23,38 @@ import Control.Monad.IO.Class
 
 import Data.Tagged
 
-import Data.Yaml
-import Data.Yaml.Pretty
+import Data.Aeson (FromJSON, Value)
+import Data.Aeson.AutoType.Alternative
+
+import qualified Data.Aeson as A
+
+import qualified Data.Yaml as Y
+import qualified Data.Yaml.Pretty as Y
+
 import Data.Text (pack, unpack)
 
 import Citeproc.Auto
 
-outputYaml :: [ReferencesElt] -> TopLevel
-outputYaml topLevelReferences = TopLevel{..}
+outputYaml :: [TopLevelElt] -> TopLevel
+outputYaml topLevelYaml = AltLeft TopLevelYaml{..}
 
 parseYaml :: forall m . MonadIO m => FilePath -> m TopLevel
-parseYaml filename = do
+parseYaml = parseMarkup Y.decode
+
+parseJson :: forall m . MonadIO m => FilePath -> m TopLevel
+parseJson = parseMarkup A.decodeStrict'
+
+parseYorJ :: forall m . MonadIO m => FilePath -> m TopLevel
+parseYorJ = parseMarkup $ (<|>) <$> Y.decode <*> A.decodeStrict'
+
+parseMarkup
+        :: forall m . MonadIO m
+        => (forall a . FromJSON a => BS.ByteString -> Maybe a)
+        -> FilePath -> m TopLevel
+parseMarkup decode_ filename = do
         input <- liftIO . BS.readFile $ filename
-        case decode input of
-            Nothing -> fatal $ case (decode input :: Maybe Value) of
+        case decode_ input of
+            Nothing -> fatal $ case (decode_ input :: Maybe Value) of
                 Nothing -> "Invalid JSON file: "     ++ filename
                 Just _  -> "Mismatched JSON value from file: " ++ filename
             Just r  -> return (r :: TopLevel)
@@ -50,19 +71,20 @@ run :: MonadIO m
     -> m ()
 run ident writeToFile filenames =
         forM_ filenames $ \(Tagged f) -> runMaybeT $ do
-            library <- parseYaml f
-            match <- hoistMaybe . headMay . filter searchFilter . topLevelReferences $ library
-            let refText = ("---\n" <>) . (<> "---\n") . encodePretty (orderingReferencesElt `setConfCompare` defConfig) . outputYaml $ [match]
+            library <- parseYorJ f
+            match <- hoistMaybe . headMay . filter searchFilter . alt topLevelYaml id $ library
+            let refText = ("---\n" <>) . (<> "---\n") . Y.encodePretty (orderingTopLevelElt `Y.setConfCompare` Y.defConfig) . outputYaml $ [match]
             case writeToFile of
                 Just (Tagged x) -> do
                     doi <- hoistMaybe . getDOI $ match
                     let refFile = x </> unpack doi <.> "yaml"
                     liftIO . createDirectoryIfMissing True . takeDirectory $ refFile
                     liftIO . (`BS.writeFile` refText) $ refFile
+                    liftIO . errLn . unwords $ ["Created", refFile, "for", unpack doi]
                 Nothing -> liftIO . BS.putStr $ refText
     where
         searchFilter = case ident of
             Left (Tagged search)  -> maybe False (pack search ==) . getDOI
-            Right (Tagged search) -> (pack search ==) . referencesEltId
+            Right (Tagged search) -> (pack search ==) . topLevelEltId
 
 
