@@ -43,95 +43,64 @@ instance ToJSON AuthorElt where
   toEncoding (AuthorElt {..}) = pairs  ("family" .= authorEltFamily<>"dropping-particle" .= authorEltDroppingParticle<>"literal" .= authorEltLiteral<>"given" .= authorEltGiven)
 
 
-data AccessedElt = AccessedElt { 
-    accessedEltDay :: Text,
-    accessedEltYear :: Text,
-    accessedEltMonth :: Text
+data Issued = Issued { 
+    issuedDateParts :: [[Double]]
   } deriving (Show,Eq,Generic)
 
 
-instance FromJSON AccessedElt where
-  parseJSON (Object v) = AccessedElt <$> v .:   "day" <*> v .:   "year" <*> v .:   "month"
+instance FromJSON Issued where
+  parseJSON (Object v) = Issued <$> v .:   "date-parts"
   parseJSON _          = mzero
 
 
-instance ToJSON AccessedElt where
-  toJSON     (AccessedElt {..}) = object ["day" .= accessedEltDay, "year" .= accessedEltYear, "month" .= accessedEltMonth]
-  toEncoding (AccessedElt {..}) = pairs  ("day" .= accessedEltDay<>"year" .= accessedEltYear<>"month" .= accessedEltMonth)
+instance ToJSON Issued where
+  toJSON     (Issued {..}) = object ["date-parts" .= issuedDateParts]
+  toEncoding (Issued {..}) = pairs  ("date-parts" .= issuedDateParts)
 
 
-data IssuedElt = IssuedElt { 
-    issuedEltYear :: Text,
-    issuedEltMonth :: (Maybe (Text:|:[(Maybe Value)]))
+data TopLevelElt = TopLevelElt { 
+    topLevelEltEdition :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltISSN :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltChapterNumber :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltAnnote :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltDOI :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltPublisherPlace :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltVolume :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltCollectionNumber :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltURL :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltPage :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltISBN :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltTitleShort :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltContainerTitle :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltAuthor :: (Maybe ([AuthorElt])),
+    topLevelEltId :: Text,
+    topLevelEltAccessed :: (Maybe (Issued:|:[(Maybe Value)])),
+    topLevelEltIssued :: (Maybe (Issued:|:[(Maybe Value)])),
+    topLevelEltPMID :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltAbstract :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltTitle :: Text,
+    topLevelEltType :: Text,
+    topLevelEltNumber :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltGenre :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltCollectionTitle :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltPublisher :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltIssue :: (Maybe (Text:|:[(Maybe Value)])),
+    topLevelEltEditor :: (Maybe ([AuthorElt])),
+    topLevelEltKeyword :: (Maybe (Text:|:[(Maybe Value)]))
   } deriving (Show,Eq,Generic)
 
 
-instance FromJSON IssuedElt where
-  parseJSON (Object v) = IssuedElt <$> v .:   "year" <*> v .:?? "month"
+instance FromJSON TopLevelElt where
+  parseJSON (Object v) = TopLevelElt <$> v .:?? "edition" <*> v .:?? "ISSN" <*> v .:?? "chapter-number" <*> v .:?? "annote" <*> v .:?? "DOI" <*> v .:?? "publisher-place" <*> v .:?? "volume" <*> v .:?? "collection-number" <*> v .:?? "URL" <*> v .:?? "page" <*> v .:?? "ISBN" <*> v .:?? "title-short" <*> v .:?? "container-title" <*> v .:?? "author" <*> v .:   "id" <*> v .:?? "accessed" <*> v .:?? "issued" <*> v .:?? "PMID" <*> v .:?? "abstract" <*> v .:   "title" <*> v .:   "type" <*> v .:?? "number" <*> v .:?? "genre" <*> v .:?? "collection-title" <*> v .:?? "publisher" <*> v .:?? "issue" <*> v .:?? "editor" <*> v .:?? "keyword"
   parseJSON _          = mzero
 
 
-instance ToJSON IssuedElt where
-  toJSON     (IssuedElt {..}) = object ["year" .= issuedEltYear, "month" .= issuedEltMonth]
-  toEncoding (IssuedElt {..}) = pairs  ("year" .= issuedEltYear<>"month" .= issuedEltMonth)
+instance ToJSON TopLevelElt where
+  toJSON     (TopLevelElt {..}) = object ["edition" .= topLevelEltEdition, "ISSN" .= topLevelEltISSN, "chapter-number" .= topLevelEltChapterNumber, "annote" .= topLevelEltAnnote, "DOI" .= topLevelEltDOI, "publisher-place" .= topLevelEltPublisherPlace, "volume" .= topLevelEltVolume, "collection-number" .= topLevelEltCollectionNumber, "URL" .= topLevelEltURL, "page" .= topLevelEltPage, "ISBN" .= topLevelEltISBN, "title-short" .= topLevelEltTitleShort, "container-title" .= topLevelEltContainerTitle, "author" .= topLevelEltAuthor, "id" .= topLevelEltId, "accessed" .= topLevelEltAccessed, "issued" .= topLevelEltIssued, "PMID" .= topLevelEltPMID, "abstract" .= topLevelEltAbstract, "title" .= topLevelEltTitle, "type" .= topLevelEltType, "number" .= topLevelEltNumber, "genre" .= topLevelEltGenre, "collection-title" .= topLevelEltCollectionTitle, "publisher" .= topLevelEltPublisher, "issue" .= topLevelEltIssue, "editor" .= topLevelEltEditor, "keyword" .= topLevelEltKeyword]
+  toEncoding (TopLevelElt {..}) = pairs  ("edition" .= topLevelEltEdition<>"ISSN" .= topLevelEltISSN<>"chapter-number" .= topLevelEltChapterNumber<>"annote" .= topLevelEltAnnote<>"DOI" .= topLevelEltDOI<>"publisher-place" .= topLevelEltPublisherPlace<>"volume" .= topLevelEltVolume<>"collection-number" .= topLevelEltCollectionNumber<>"URL" .= topLevelEltURL<>"page" .= topLevelEltPage<>"ISBN" .= topLevelEltISBN<>"title-short" .= topLevelEltTitleShort<>"container-title" .= topLevelEltContainerTitle<>"author" .= topLevelEltAuthor<>"id" .= topLevelEltId<>"accessed" .= topLevelEltAccessed<>"issued" .= topLevelEltIssued<>"PMID" .= topLevelEltPMID<>"abstract" .= topLevelEltAbstract<>"title" .= topLevelEltTitle<>"type" .= topLevelEltType<>"number" .= topLevelEltNumber<>"genre" .= topLevelEltGenre<>"collection-title" .= topLevelEltCollectionTitle<>"publisher" .= topLevelEltPublisher<>"issue" .= topLevelEltIssue<>"editor" .= topLevelEltEditor<>"keyword" .= topLevelEltKeyword)
 
 
-data ReferencesElt = ReferencesElt { 
-    referencesEltEdition :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltISSN :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltChapterNumber :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltAnnote :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltDOI :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltPublisherPlace :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltVolume :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltCollectionNumber :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltURL :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltPage :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltISBN :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltTitleShort :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltContainerTitle :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltAuthor :: (Maybe ([AuthorElt])),
-    referencesEltId :: Text,
-    referencesEltAccessed :: (Maybe ([AccessedElt])),
-    referencesEltIssued :: (Maybe ([IssuedElt])),
-    referencesEltPMID :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltAbstract :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltTitle :: Text,
-    referencesEltType :: Text,
-    referencesEltNumber :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltGenre :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltCollectionTitle :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltPublisher :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltIssue :: (Maybe (Text:|:[(Maybe Value)])),
-    referencesEltEditor :: (Maybe ([AuthorElt])),
-    referencesEltKeyword :: (Maybe (Text:|:[(Maybe Value)]))
-  } deriving (Show,Eq,Generic)
-
-
-instance FromJSON ReferencesElt where
-  parseJSON (Object v) = ReferencesElt <$> v .:?? "edition" <*> v .:?? "ISSN" <*> v .:?? "chapter-number" <*> v .:?? "annote" <*> v .:?? "DOI" <*> v .:?? "publisher-place" <*> v .:?? "volume" <*> v .:?? "collection-number" <*> v .:?? "URL" <*> v .:?? "page" <*> v .:?? "ISBN" <*> v .:?? "title-short" <*> v .:?? "container-title" <*> v .:?? "author" <*> v .:   "id" <*> v .:?? "accessed" <*> v .:?? "issued" <*> v .:?? "PMID" <*> v .:?? "abstract" <*> v .:   "title" <*> v .:   "type" <*> v .:?? "number" <*> v .:?? "genre" <*> v .:?? "collection-title" <*> v .:?? "publisher" <*> v .:?? "issue" <*> v .:?? "editor" <*> v .:?? "keyword"
-  parseJSON _          = mzero
-
-
-instance ToJSON ReferencesElt where
-  toJSON     (ReferencesElt {..}) = object ["edition" .= referencesEltEdition, "ISSN" .= referencesEltISSN, "chapter-number" .= referencesEltChapterNumber, "annote" .= referencesEltAnnote, "DOI" .= referencesEltDOI, "publisher-place" .= referencesEltPublisherPlace, "volume" .= referencesEltVolume, "collection-number" .= referencesEltCollectionNumber, "URL" .= referencesEltURL, "page" .= referencesEltPage, "ISBN" .= referencesEltISBN, "title-short" .= referencesEltTitleShort, "container-title" .= referencesEltContainerTitle, "author" .= referencesEltAuthor, "id" .= referencesEltId, "accessed" .= referencesEltAccessed, "issued" .= referencesEltIssued, "PMID" .= referencesEltPMID, "abstract" .= referencesEltAbstract, "title" .= referencesEltTitle, "type" .= referencesEltType, "number" .= referencesEltNumber, "genre" .= referencesEltGenre, "collection-title" .= referencesEltCollectionTitle, "publisher" .= referencesEltPublisher, "issue" .= referencesEltIssue, "editor" .= referencesEltEditor, "keyword" .= referencesEltKeyword]
-  toEncoding (ReferencesElt {..}) = pairs  ("edition" .= referencesEltEdition<>"ISSN" .= referencesEltISSN<>"chapter-number" .= referencesEltChapterNumber<>"annote" .= referencesEltAnnote<>"DOI" .= referencesEltDOI<>"publisher-place" .= referencesEltPublisherPlace<>"volume" .= referencesEltVolume<>"collection-number" .= referencesEltCollectionNumber<>"URL" .= referencesEltURL<>"page" .= referencesEltPage<>"ISBN" .= referencesEltISBN<>"title-short" .= referencesEltTitleShort<>"container-title" .= referencesEltContainerTitle<>"author" .= referencesEltAuthor<>"id" .= referencesEltId<>"accessed" .= referencesEltAccessed<>"issued" .= referencesEltIssued<>"PMID" .= referencesEltPMID<>"abstract" .= referencesEltAbstract<>"title" .= referencesEltTitle<>"type" .= referencesEltType<>"number" .= referencesEltNumber<>"genre" .= referencesEltGenre<>"collection-title" .= referencesEltCollectionTitle<>"publisher" .= referencesEltPublisher<>"issue" .= referencesEltIssue<>"editor" .= referencesEltEditor<>"keyword" .= referencesEltKeyword)
-
-
-data TopLevel = TopLevel { 
-    topLevelReferences :: [ReferencesElt]
-  } deriving (Show,Eq,Generic)
-
-
-instance FromJSON TopLevel where
-  parseJSON (Object v) = TopLevel <$> v .:   "references"
-  parseJSON _          = mzero
-
-
-instance ToJSON TopLevel where
-  toJSON     (TopLevel {..}) = object ["references" .= topLevelReferences]
-  toEncoding (TopLevel {..}) = pairs  ("references" .= topLevelReferences)
-
+type TopLevel = [TopLevelElt]
 
 
 
