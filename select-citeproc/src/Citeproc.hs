@@ -3,6 +3,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Citeproc (
     run
@@ -23,6 +24,7 @@ import Control.Monad.IO.Class
 import Data.Tagged
 
 import Data.Aeson (FromJSON, Value)
+import Data.Aeson.AutoType.Alternative
 
 import qualified Data.Aeson as A
 
@@ -33,8 +35,8 @@ import Data.Text (pack, unpack)
 
 import Citeproc.Auto
 
-outputYaml :: [ReferencesElt] -> TopLevel
-outputYaml topLevelReferences = TopLevel{..}
+outputYaml :: [TopLevelElt] -> TopLevel
+outputYaml topLevelYaml = AltLeft TopLevelYaml{..}
 
 parseYaml :: forall m . MonadIO m => FilePath -> m TopLevel
 parseYaml = parseMarkup Y.decode
@@ -70,8 +72,8 @@ run :: MonadIO m
 run ident writeToFile filenames =
         forM_ filenames $ \(Tagged f) -> runMaybeT $ do
             library <- parseYorJ f
-            match <- hoistMaybe . headMay . filter searchFilter . topLevelReferences $ library
-            let refText = ("---\n" <>) . (<> "---\n") . Y.encodePretty (orderingReferencesElt `Y.setConfCompare` Y.defConfig) . outputYaml $ [match]
+            match <- hoistMaybe . headMay . filter searchFilter . alt topLevelYaml id $ library
+            let refText = ("---\n" <>) . (<> "---\n") . Y.encodePretty (orderingTopLevelElt `Y.setConfCompare` Y.defConfig) . outputYaml $ [match]
             case writeToFile of
                 Just (Tagged x) -> do
                     doi <- hoistMaybe . getDOI $ match
@@ -83,6 +85,6 @@ run ident writeToFile filenames =
     where
         searchFilter = case ident of
             Left (Tagged search)  -> maybe False (pack search ==) . getDOI
-            Right (Tagged search) -> (pack search ==) . referencesEltId
+            Right (Tagged search) -> (pack search ==) . topLevelEltId
 
 
