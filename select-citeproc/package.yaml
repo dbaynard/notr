@@ -22,7 +22,7 @@ library:
   - directory
   - errors
   - filepath
-  - json-autotype >= 1.0.15
+  - json-autotype >= 1.0.16
   - tagged
   - text
   - yaml
