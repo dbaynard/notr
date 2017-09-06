@@ -1,0 +1,74 @@
+resolver: lts-9.2
+
+compiler: ghc-8.0.2
+
+packages:
+# Newer than stackage
+# - Cabal-2.0.0.2
+- aeson-1.2.1.0
+- attoparsec-0.13.2.0
+- git-annex-6.20170818
+- binary-0.8.5.1
+- containers-0.5.10.2
+- haskell-src-exts-1.19.1
+- hslua-0.8.0
+- mmorph-1.1.0
+- parser-combinators-0.2.0
+# - pandoc-1.19.2.1
+- pandoc-citeproc-0.11.1
+- pandoc-types-1.17.1
+- QuickCheck-2.10.0.1
+- persistent-template-2.5.2
+- servant-auth-0.2.7.0
+- servant-auth-server-0.2.7.1
+- servant-auth-server-0.2.8.0
+- tasty-quickcheck-0.9.1
+#- singletons-2.3.1
+- stack-1.5.1
+#- th-desugar-1.7
+- time-1.8.0.2
+# Not on stackage
+- GenericPretty-1.2.1
+- GoogleChart-0.2
+- brittany-0.8.0.2
+- butcher-1.1.0.1
+- cmark-gfm-0.1.1
+- czipwith-1.0.0.0
+- data-tree-print-0.1.0.0
+- deque-0.2
+- derive-storable-0.1.0.6
+- dhall-1.5.1
+- diff-parse-0.2.1
+- digestive-functors-0.8.2.0
+- digestive-functors-lucid-0.0.0.4
+- dotgen-0.4.2
+- fgl-visualize-0.1.0.1
+- friday-0.2.3.1
+- generic-arbitrary-0.1.0
+- haddock-api-2.17.4
+# - haddock-api-2.18.1
+- haddock-library-1.4.3
+- helium-overture-1.0.0
+- hflags-0.4.2
+- hpack-0.18.1
+- hpack-convert-1.0.1
+- io-capture-1.0.0
+- json-autotype-1.0.15
+- jsons-to-schema-0.1.0.0
+- latex-formulae-image-0.1.1.3
+- latex-formulae-pandoc-0.2.0.5
+- lifted-protolude-0.1.6
+- monad-memo-0.4.1
+- pandoc-crossref-0.2.6.0
+- plots-0.1.0.2
+- ratio-int-0.1.2
+- react-flux-1.2.3
+- react-flux-servant-0.1.1
+- roman-numerals-0.5.1.5
+- samtools-0.2.4.3
+- servant-auth-0.2.7.0
+- servant-auth-client-0.2.7.1
+- servant-auth-server-0.3.0.0
+- skylighting-0.3.3.1
+- timezone-olson-th-0.1.0.3
+- vgrep-0.2.0.0
