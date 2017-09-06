@@ -31,7 +31,8 @@ import qualified Data.Aeson as A
 import qualified Data.Yaml as Y
 import qualified Data.Yaml.Pretty as Y
 
-import Data.Text (pack, unpack)
+import Data.Text (Text)
+import qualified Data.Text as T
 
 import Citeproc.Auto
 
@@ -55,11 +56,11 @@ parseMarkup decode_ filename = do
         input <- liftIO . BS.readFile $ filename
         case decode_ input of
             Nothing -> fatal $ case (decode_ input :: Maybe Value) of
-                Nothing -> "Invalid JSON file: "     ++ filename
-                Just _  -> "Mismatched JSON value from file: " ++ filename
+                Nothing -> "Invalid JSON file: "     <> T.pack filename
+                Just _  -> "Mismatched JSON value from file: " <> T.pack filename
             Just r  -> return (r :: TopLevel)
     where
-        fatal :: String -> m a
+        fatal :: Text -> m a
         fatal msg = liftIO $ do
             errLn msg
             exitFailure
@@ -77,14 +78,14 @@ run ident writeToFile filenames =
             case writeToFile of
                 Just (Tagged x) -> do
                     doi <- hoistMaybe . getDOI $ match
-                    let refFile = x </> unpack doi <.> "yaml"
+                    let refFile = x </> T.unpack doi <.> "yaml"
                     liftIO . createDirectoryIfMissing True . takeDirectory $ refFile
                     liftIO . (`BS.writeFile` refText) $ refFile
-                    liftIO . errLn . unwords $ ["Created", refFile, "for", unpack doi]
+                    liftIO . errLn . T.unwords $ ["Created", T.pack refFile, "for", doi]
                 Nothing -> liftIO . BS.putStr $ refText
     where
         searchFilter = case ident of
-            Left (Tagged search)  -> maybe False (pack search ==) . getDOI
-            Right (Tagged search) -> (pack search ==) . topLevelEltId
+            Left (Tagged search)  -> maybe False (T.pack search ==) . getDOI
+            Right (Tagged search) -> (T.pack search ==) . topLevelEltId
 
 
