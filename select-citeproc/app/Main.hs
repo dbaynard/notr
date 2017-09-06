@@ -19,6 +19,7 @@ data Options = Options
     , doi :: Bool
     , write :: Bool
     , defaultLibrary :: Maybe FilePath
+    , standalone :: Bool
     } deriving (Show, Generic, HasArguments)
 
 mods :: [Modifier]
@@ -26,6 +27,7 @@ mods = [ AddShortOption "libraries" 'l'
        , AddShortOption "write" 'w'
        , AddShortOption "doi" 'd'
        , AddShortOption "defaultLibrary" 'L'
+       , AddShortOption "standalone" 's'
        ]
 
 main :: IO ()
@@ -43,4 +45,4 @@ main = mods `withCliModified` \identifier Options{..} -> do
         fileDir = case write of
             True -> Just . Tagged @"write-to-file" $ "doi"
             False -> Nothing
-    run searchTerm fileDir filenames
+    run searchTerm fileDir (Tagged standalone) filenames

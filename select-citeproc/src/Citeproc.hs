@@ -33,6 +33,8 @@ import qualified Data.Yaml.Pretty as Y
 
 import Data.Text (Text)
 import qualified Data.Text as T
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B8
 
 import Citeproc.Auto
 
@@ -68,13 +70,15 @@ parseMarkup decode_ filename = do
 run :: MonadIO m
     => Either (Tagged "doi" String) (Tagged "identifier" String)
     -> Maybe (Tagged "write-to-file" FilePath)
+    -> Tagged "standalone" Bool
     -> [Tagged "filename" FilePath]
     -> m ()
-run ident writeToFile filenames =
+run ident writeToFile standalone filenames =
         forM_ filenames $ \(Tagged f) -> runMaybeT $ do
             library <- parseYorJ f
             match <- hoistMaybe . headMay . filter searchFilter . alt topLevelYaml id $ library
-            let refText = ("---\n" <>) . (<> "---\n") . Y.encodePretty (orderingTopLevelElt `Y.setConfCompare` Y.defConfig) . outputYaml $ [match]
+            let rewrap = if untag standalone then ("---\n" <>) . (<> "\n---\n") else (<> "\n") . B8.drop 12 -- drop the 'references:\n' leader
+            let refText = rewrap . Y.encodePretty (orderingTopLevelElt `Y.setConfCompare` Y.defConfig) . outputYaml $ [match]
             case writeToFile of
                 Just (Tagged x) -> do
                     doi <- hoistMaybe . getDOI $ match
