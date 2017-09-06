@@ -15,7 +15,9 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-7.1
+resolver:
+  name: default-snapshot
+  location: snapshot.yaml
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -37,11 +39,13 @@ resolver: lts-7.1
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - 'select-citeproc'
+- location:
+    git: https://github.com/dbaynard/json-autotype.git
+    commit: bc6668745de76302c2d083f46bd68bbeeefb7766
+  extra-dep: true
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps:
-- json-autotype-1.0.15
-- aeson-1.1.0.0
+extra-deps: []
 
 # Override default flag values for local packages and extra-deps
 flags: {}
