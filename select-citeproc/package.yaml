@@ -1,5 +1,5 @@
 name: select-citeproc
-version: '0.1.0.0'
+version: '0.1.1.0'
 synopsis: Select a record from citeproc.yaml
 description: Please see README.md
 category: Science
