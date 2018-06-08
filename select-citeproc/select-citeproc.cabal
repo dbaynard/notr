@@ -1,6 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.18.1.
+-- This file has been generated from package.yaml by hpack version 0.27.0.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: 06aebc41556a944c8d83cae21584440163a3197b3564436423592d7e55d10901
 
 name:           select-citeproc
 version:        0.1.1.0
@@ -29,13 +31,13 @@ library
       src
   ghc-options: -Wall
   build-depends:
-      base >=4.7 && <5
-    , aeson >= 1.1.0.0
+      aeson >=1.1.0.0
+    , base >=4.7 && <5
     , bytestring
     , directory
     , errors
     , filepath
-    , json-autotype >= 1.0.16
+    , json-autotype >=1.0.16
     , tagged
     , text
     , yaml
@@ -48,25 +50,29 @@ library
 
 executable select-citeproc
   main-is: Main.hs
+  other-modules:
+      Paths_select_citeproc
   hs-source-dirs:
       app
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
-    , select-citeproc
     , errors
     , getopt-generics
+    , select-citeproc
     , tagged
   default-language: Haskell2010
 
 test-suite select-citeproc-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
+  other-modules:
+      Paths_select_citeproc
   hs-source-dirs:
       test
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
-    , select-citeproc
     , hspec
+    , select-citeproc
   default-language: Haskell2010
