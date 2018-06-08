@@ -15,9 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver:
-  name: default-snapshot
-  location: snapshot.yaml
+resolver: https://gist.github.com/dbaynard/9693107a883a6282f52f22785d0072e2/raw/e575fa64d8e2c0ec9bb4c370a5fc8b20eb613c26
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -39,10 +37,7 @@ resolver:
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - 'select-citeproc'
-- location:
-    git: https://github.com/dbaynard/json-autotype.git
-    commit: bc6668745de76302c2d083f46bd68bbeeefb7766
-  extra-dep: true
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: []
